@@ -85,6 +85,7 @@
 <nav><div class="wrap">
   <a class="logo" href="#">WAVE<span>RADAR</span></a>
   <a href="#demo" data-i18n="nav_demo">Demo</a>
+  <a href="#tutorial" data-i18n="nav_tut">Tutorial</a>
   <a href="#install" data-i18n="nav_install">Install</a>
   <a href="#how" data-i18n="nav_how">How it works</a>
   <a href="https://github.com/elevbit-ai/waveradar">GitHub</a>
@@ -116,6 +117,18 @@
   </video>
   <p style="text-align:center;margin-top:10px;font-size:13px;color:var(--muted)">
     <a href="assets/demo.gif" style="color:var(--green-dim)" data-i18n="demo_gif">GIF version</a></p>
+</div></section>
+
+<section id="tutorial"><div class="wrap">
+  <h2 data-i18n="tut_h">Video tutorial</h2>
+  <p data-i18n="tut_p">A complete narrated walkthrough (pt-BR): the physics
+     behind Wi-Fi sensing, installing on Windows and Linux, reading the
+     radar, the three sensing modes, the signal-processing pipeline step by
+     step, the ESP32 CSI firmware, and the system's honest limits.</p>
+  <br>
+  <video controls preload="metadata" poster="assets/screenshot.png">
+    <source src="assets/tutorial.mp4" type="video/mp4">
+  </video>
 </div></section>
 
 <section id="install"><div class="wrap">
@@ -217,7 +230,10 @@ document.querySelectorAll(".copy").forEach(b=>{
 });
 
 const PT = {
-  nav_demo:"Demo", nav_install:"Instalar", nav_how:"Como funciona",
+  nav_demo:"Demo", nav_tut:"Tutorial", nav_install:"Instalar",
+  nav_how:"Como funciona",
+  tut_h:"Vídeo tutorial",
+  tut_p:"Um passo a passo completo e narrado (pt-BR): a física por trás do sensoriamento Wi-Fi, a instalação no Windows e no Linux, como ler o radar, os três modos de sensoriamento, o pipeline de processamento de sinais passo a passo, o firmware CSI do ESP32 e os limites honestos do sistema.",
   tagline:"Veja movimento através do canal de rádio do seu próprio roteador — CSI, Doppler e análise de amplitude/fase, exibidos como um radar ao vivo. Sem câmeras. Sem sensores extras.",
   cta_install:"Instale em uma linha", cta_demo:"Assista à demo",
   demo_h:"Demonstração",

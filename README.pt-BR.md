@@ -6,7 +6,7 @@
 
 **Veja movimento através do canal de rádio do seu próprio roteador — CSI, Doppler e análise de amplitude/fase, exibidos como um radar ao vivo.**
 
-[**Site**](https://elevbit-ai.github.io/waveradar/) · [**Vídeo demo**](https://elevbit-ai.github.io/waveradar/#demo) · [**English**](README.md)
+[**Site**](https://elevbit-ai.github.io/waveradar/) · [**Vídeo demo**](https://elevbit-ai.github.io/waveradar/#demo) · [**Tutorial em vídeo**](https://elevbit-ai.github.io/waveradar/#tutorial) · [**English**](README.md)
 
 <img src="docs/assets/demo.gif" width="480" alt="Demonstração do WaveRadar — movimento detectado via Wi-Fi exibido como pontos no radar">
 

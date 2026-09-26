@@ -11,7 +11,7 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey.svg)](#quick-start)
 [![Website](https://img.shields.io/badge/Website-elevbit--ai.github.io%2Fwaveradar-0f9150.svg)](https://elevbit-ai.github.io/waveradar/)
 
-[**Website**](https://elevbit-ai.github.io/waveradar/) · [**Demo video**](https://elevbit-ai.github.io/waveradar/#demo) · [**Português (BR)**](README.pt-BR.md)
+[**Website**](https://elevbit-ai.github.io/waveradar/) · [**Demo video**](https://elevbit-ai.github.io/waveradar/#demo) · [**Video tutorial (pt-BR)**](https://elevbit-ai.github.io/waveradar/#tutorial) · [**Português (BR)**](README.pt-BR.md)
 
 <img src="docs/assets/demo.gif" width="480" alt="WaveRadar live demo — motion detected through Wi-Fi and shown as radar blips">
 
