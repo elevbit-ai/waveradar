@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WaveRadar — Wi-Fi Sensing Motion Radar</title>
+<meta name="description" content="See movement through the radio channel of your own router — CSI, Doppler and amplitude/phase analysis rendered as a live radar. By Joaquim Pedro de Morais Filho.">
+<meta name="author" content="Joaquim Pedro de Morais Filho">
+<meta property="og:title" content="WaveRadar — Wi-Fi Sensing Motion Radar">
+<meta property="og:description" content="Detect motion with your own router. CSI · Doppler · phase/amplitude · radar display.">
+<meta property="og:image" content="https://elevbit-ai.github.io/waveradar/assets/screenshot.png">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+<style>
+  :root{
+    --bg:#050d0a; --panel:#081711; --line:#0f2b1e;
+    --green:#2bff88; --green-dim:#0f9150; --amber:#ffc74d;
+    --text:#c9f4dd; --muted:#5e8f76;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);
+       font-family:"Segoe UI",system-ui,sans-serif;line-height:1.65}
+  .wrap{max-width:960px;margin:0 auto;padding:0 22px}
+  nav{position:sticky;top:0;background:rgba(5,13,10,.92);
+      backdrop-filter:blur(6px);border-bottom:1px solid var(--line);z-index:9}
+  nav .wrap{display:flex;align-items:center;gap:18px;padding:12px 22px}
+  .logo{font-weight:700;letter-spacing:3px;color:var(--green);
+        font-size:17px;text-decoration:none}
+  .logo span{color:var(--muted);font-weight:300}
+  nav a{color:var(--muted);text-decoration:none;font-size:14px}
+  nav a:hover{color:var(--green)}
+  #lang{margin-left:auto;background:var(--panel);color:var(--green);
+        border:1px solid var(--line);border-radius:8px;padding:5px 12px;
+        cursor:pointer;font-size:13px}
+  header.hero{text-align:center;padding:64px 0 30px}
+  .hero h1{font-size:clamp(34px,6vw,54px);letter-spacing:4px;color:var(--green)}
+  .hero h1 span{color:var(--muted);font-weight:300}
+  .hero p.tag{max-width:640px;margin:16px auto 0;font-size:18px}
+  .badges{margin-top:14px;color:var(--muted);font-size:13px;
+          font-family:Consolas,monospace}
+  .cta{display:flex;gap:14px;justify-content:center;margin-top:26px;
+       flex-wrap:wrap}
+  .btn{padding:11px 22px;border-radius:10px;text-decoration:none;
+       font-weight:600;font-size:15px}
+  .btn.primary{background:var(--green);color:#03110a}
+  .btn.ghost{border:1px solid var(--green-dim);color:var(--green)}
+  section{padding:44px 0;border-top:1px solid var(--line)}
+  h2{color:var(--green);font-size:24px;letter-spacing:1px;margin-bottom:18px}
+  .panel{background:var(--panel);border:1px solid var(--line);
+         border-radius:14px;padding:20px}
+  video,img.demo{width:100%;max-width:560px;border-radius:14px;
+        border:1px solid var(--line);display:block;margin:0 auto}
+  pre{background:#03110a;border:1px solid var(--line);border-radius:10px;
+      padding:14px 16px;overflow-x:auto;font-size:14px;
+      font-family:Consolas,monospace;color:var(--green);position:relative;
+      margin:10px 0}
+  pre b{color:var(--muted);font-weight:400}
+  .copy{position:absolute;top:8px;right:8px;background:var(--panel);
+        border:1px solid var(--line);color:var(--muted);border-radius:6px;
+        padding:3px 10px;font-size:12px;cursor:pointer}
+  .copy:hover{color:var(--green)}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+         gap:16px;margin-top:8px}
+  .card h3{color:var(--text);font-size:17px;margin-bottom:8px}
+  .card .mode{color:var(--amber);font-family:Consolas,monospace;
+              font-size:13px}
+  .card p{font-size:14.5px;color:var(--text)}
+  .card .hw{margin-top:10px;font-size:13px;color:var(--muted)}
+  .flow{font-family:Consolas,monospace;font-size:13.5px;color:var(--text);
+        line-height:1.9}
+  ul{padding-left:22px}
+  li{margin:8px 0;font-size:15px}
+  li b{color:var(--green)}
+  .note{border-left:3px solid var(--amber);padding:12px 16px;
+        background:#120f05;border-radius:0 10px 10px 0;font-size:14.5px;
+        margin-top:16px}
+  footer{border-top:1px solid var(--line);padding:34px 0 44px;
+         text-align:center;color:var(--muted);font-size:14px}
+  footer a{color:var(--green-dim)}
+  .sig{margin-top:6px;color:var(--text)}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <a class="logo" href="#">WAVE<span>RADAR</span></a>
+  <a href="#demo" data-i18n="nav_demo">Demo</a>
+  <a href="#install" data-i18n="nav_install">Install</a>
+  <a href="#how" data-i18n="nav_how">How it works</a>
+  <a href="https://github.com/elevbit-ai/waveradar">GitHub</a>
+  <button id="lang">PT-BR</button>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <h1>WAVE<span>RADAR</span></h1>
+  <p class="tag" data-i18n="tagline">See movement through the radio channel of
+     your own router — CSI, Doppler and amplitude/phase analysis, rendered as
+     a live radar display. No cameras. No extra sensors.</p>
+  <div class="badges">MIT License · Python 3.9+ · Windows &amp; Linux ·
+     RSSI / CSI (ESP32)</div>
+  <div class="cta">
+    <a class="btn primary" href="#install" data-i18n="cta_install">Install in one line</a>
+    <a class="btn ghost" href="#demo" data-i18n="cta_demo">Watch the demo</a>
+  </div>
+</div></header>
+
+<section id="demo"><div class="wrap">
+  <h2 data-i18n="demo_h">Demo</h2>
+  <p data-i18n="demo_p">The full pipeline running on the built-in simulated
+     scenario: empty room → person walks in → slow gestures → fast crossing →
+     still → movement near the far wall. Everything you see (score, Doppler
+     spectrum, radar blips) is produced by the real signal-processing engine.</p>
+  <br>
+  <video controls autoplay muted loop playsinline poster="assets/screenshot.png">
+    <source src="assets/demo.mp4" type="video/mp4">
+  </video>
+  <p style="text-align:center;margin-top:10px;font-size:13px;color:var(--muted)">
+    <a href="assets/demo.gif" style="color:var(--green-dim)" data-i18n="demo_gif">GIF version</a></p>
+</div></section>
+
+<section id="install"><div class="wrap">
+  <h2 data-i18n="inst_h">Install &amp; run</h2>
+  <p><b style="color:var(--amber)">Windows</b> (PowerShell):</p>
+  <pre><button class="copy">copy</button>irm https://elevbit-ai.github.io/waveradar/install.ps1 | iex</pre>
+  <p><b style="color:var(--amber)">Linux / macOS</b>:</p>
+  <pre><button class="copy">copy</button>curl -fsSL https://elevbit-ai.github.io/waveradar/install.sh | bash</pre>
+  <p data-i18n="inst_pip">Or with pip:</p>
+  <pre><button class="copy">copy</button>pip install "waveradar[esp32] @ git+https://github.com/elevbit-ai/waveradar.git"
+<b># then:</b>
+waveradar                <b># radar from your router's signal</b>
+waveradar --source sim   <b># no-hardware demo</b>
+waveradar --source esp32 <b># true CSI via ESP32</b></pre>
+  <p data-i18n="inst_open">The radar opens at
+     <span style="font-family:Consolas,monospace">http://127.0.0.1:8347</span>.
+     It calibrates for a few seconds, then walk around — you'll see it.</p>
+</div></section>
+
+<section><div class="wrap">
+  <h2 data-i18n="modes_h">Sensing modes</h2>
+  <div class="cards">
+    <div class="panel card">
+      <div class="mode">--source auto</div>
+      <h3>RSSI</h3>
+      <p data-i18n="mode_rssi">Any router + the Wi-Fi already in your PC.
+         Signal-strength sampling at ~6–9 Hz reveals motion presence,
+         intensity and dominant Doppler frequency.</p>
+      <div class="hw" data-i18n="hw_none">Hardware: none</div>
+    </div>
+    <div class="panel card">
+      <div class="mode">--source esp32</div>
+      <h3>CSI · ESP32</h3>
+      <p data-i18n="mode_csi">True Channel State Information: ~52 subcarriers
+         with amplitude + phase at 50–100 Hz, streamed over USB. Richer
+         micro-Doppler and multi-sector radar blips. Firmware included
+         (Arduino IDE, 5 min).</p>
+      <div class="hw" data-i18n="hw_esp">Hardware: one $4 ESP32 board</div>
+    </div>
+    <div class="panel card">
+      <div class="mode">--source sim</div>
+      <h3 data-i18n="mode_sim_h">Simulator</h3>
+      <p data-i18n="mode_sim">Synthetic 52-subcarrier CSI with a scripted
+         moving target — try the whole system with zero hardware. Used to
+         render the demo video above.</p>
+      <div class="hw" data-i18n="hw_none2">Hardware: none</div>
+    </div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <h2 data-i18n="how_h">How it works</h2>
+  <div class="panel flow">
+router ))) <span style="color:var(--amber)" data-i18n="f_body">moving body</span> ))) <span data-i18n="f_pert">perturbed multipath</span> ))) receiver<br>
+&nbsp;&nbsp;→ <span data-i18n="f_win">sliding window (64 samples), detrend static paths</span><br>
+&nbsp;&nbsp;→ <span data-i18n="f_fft">Hann + FFT per channel, band-limited to 0.15–4 Hz</span><br>
+&nbsp;&nbsp;→ <span data-i18n="f_score">band energy vs adaptive quiet baseline → motion score</span><br>
+&nbsp;&nbsp;→ <span data-i18n="f_dop">spectral peak → dominant Doppler (Hz)</span><br>
+&nbsp;&nbsp;→ <span data-i18n="f_sec">per-subcarrier energy in 12 sectors → radar blips</span><br>
+&nbsp;&nbsp;→ <span data-i18n="f_ui">canvas radar UI in the browser, ~12 Hz</span>
+  </div>
+  <ul style="margin-top:18px">
+    <li data-i18n="how1"><b>Amplitude/phase variation</b> — a moving reflector
+        changes the path lengths the signal travels, modulating each
+        subcarrier's amplitude and phase.</li>
+    <li data-i18n="how2"><b>Doppler</b> — motion at speed v shifts reflected
+        energy by f_d ≈ 2v/λ (≈ 16 Hz per m/s at 2.4 GHz); human-scale motion
+        concentrates in 0.15–4 Hz of channel variation, exactly the band
+        WaveRadar isolates.</li>
+    <li data-i18n="how3"><b>CSI</b> — the per-subcarrier complex channel
+        estimate every OFDM receiver already computes. The ESP32 exposes it;
+        consumer routers usually don't, so RSSI mode is the zero-hardware
+        path.</li>
+  </ul>
+  <div class="note" data-i18n="note">Honesty note: with a single radio link
+     the radar detects that something moves, how much, and its Doppler
+     content — not absolute position. Blip bearing is a stable projection of
+     which multipath components are perturbed, not calibrated
+     angle-of-arrival. True localisation needs multiple antennas or links.
+     Use only on networks and spaces you own or administer, with the
+     knowledge of the people present.</div>
+</div></section>
+
+<footer><div class="wrap">
+  <div>WaveRadar · MIT License ·
+    <a href="https://github.com/elevbit-ai/waveradar">github.com/elevbit-ai/waveradar</a></div>
+  <div class="sig">© 2026 <b>Joaquim Pedro de Morais Filho</b> ·
+    <a href="mailto:j360074@hotmail.com">j360074@hotmail.com</a></div>
+</div></footer>
+
+<script>
+"use strict";
+document.querySelectorAll(".copy").forEach(b=>{
+  b.addEventListener("click",()=>{
+    const t = b.parentElement.innerText.replace(/^copy\s*/,"").trim();
+    navigator.clipboard.writeText(t);
+    b.textContent = "copied!"; setTimeout(()=>b.textContent="copy",1200);
+  });
+});
+
+const PT = {
+  nav_demo:"Demo", nav_install:"Instalar", nav_how:"Como funciona",
+  tagline:"Veja movimento através do canal de rádio do seu próprio roteador — CSI, Doppler e análise de amplitude/fase, exibidos como um radar ao vivo. Sem câmeras. Sem sensores extras.",
+  cta_install:"Instale em uma linha", cta_demo:"Assista à demo",
+  demo_h:"Demonstração",
+  demo_p:"O pipeline completo rodando no cenário simulado embutido: sala vazia → pessoa entra andando → gestos lentos → travessia rápida → parado → movimento perto da parede distante. Tudo o que você vê (score, espectro Doppler, pontos no radar) é produzido pelo motor real de processamento de sinais.",
+  demo_gif:"Versão em GIF",
+  inst_h:"Instalar e executar", inst_pip:"Ou com pip:",
+  inst_open:"O radar abre em http://127.0.0.1:8347. Ele calibra por alguns segundos; depois ande pela sala — você vai ver.",
+  modes_h:"Modos de sensoriamento",
+  mode_rssi:"Qualquer roteador + o Wi-Fi que já está no seu PC. Amostragem da intensidade do sinal a ~6–9 Hz revela presença de movimento, intensidade e frequência Doppler dominante.",
+  hw_none:"Hardware: nenhum", hw_none2:"Hardware: nenhum",
+  mode_csi:"Channel State Information de verdade: ~52 subportadoras com amplitude + fase a 50–100 Hz via USB. Micro-Doppler mais rico e pontos em múltiplos setores. Firmware incluído (Arduino IDE, 5 min).",
+  hw_esp:"Hardware: uma placa ESP32 (~R$ 25)",
+  mode_sim_h:"Simulador",
+  mode_sim:"CSI sintético de 52 subportadoras com um alvo em movimento roteirizado — experimente o sistema inteiro sem hardware. Usado para renderizar o vídeo demo acima.",
+  how_h:"Como funciona",
+  f_body:"corpo em movimento", f_pert:"multipercurso perturbado",
+  f_win:"janela deslizante (64 amostras), remoção dos caminhos estáticos",
+  f_fft:"Hann + FFT por canal, limitado à banda 0,15–4 Hz",
+  f_score:"energia da banda vs baseline adaptativo → score de movimento",
+  f_dop:"pico espectral → Doppler dominante (Hz)",
+  f_sec:"energia por subportadora em 12 setores → pontos no radar",
+  f_ui:"radar em canvas no navegador, ~12 Hz",
+  how1:"Variação de amplitude/fase — um refletor em movimento muda o comprimento dos caminhos do sinal, modulando amplitude e fase de cada subportadora.",
+  how2:"Doppler — movimento a velocidade v desloca a energia refletida em f_d ≈ 2v/λ (≈ 16 Hz por m/s em 2,4 GHz); o movimento humano concentra-se em 0,15–4 Hz de variação do canal, exatamente a banda que o WaveRadar isola.",
+  how3:"CSI — a estimativa complexa do canal por subportadora que todo receptor OFDM já calcula. O ESP32 a expõe; roteadores domésticos normalmente não, por isso o modo RSSI é o caminho sem hardware.",
+  note:"Nota de honestidade: com um único enlace de rádio, o radar detecta que algo se move, quanto se move e seu conteúdo Doppler — não a posição absoluta. O ângulo dos pontos é uma projeção estável de quais componentes de multipercurso estão perturbados, não direção de chegada calibrada. Localização real exige múltiplas antenas ou enlaces. Use apenas em redes e espaços que você possui ou administra, com o conhecimento das pessoas presentes."
+};
+const EN = {};
+let cur = "en";
+const langBtn = document.getElementById("lang");
+document.querySelectorAll("[data-i18n]").forEach(el=>{
+  EN[el.dataset.i18n] = el.innerHTML;
+});
+langBtn.addEventListener("click",()=>{
+  cur = cur === "en" ? "pt" : "en";
+  langBtn.textContent = cur === "en" ? "PT-BR" : "EN";
+  const dict = cur === "en" ? EN : PT;
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const v = dict[el.dataset.i18n];
+    if(v !== undefined){
+      if(cur === "en") el.innerHTML = v; else el.textContent = v;
+    }
+  });
+  document.documentElement.lang = cur === "en" ? "en" : "pt-BR";
+});
+</script>
+</body>
+</html>

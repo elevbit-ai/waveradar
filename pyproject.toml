@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "waveradar"
+version = "1.0.0"
+description = "Wi-Fi sensing motion radar — detect movement through the radio channel of your own router (RSSI / CSI / Doppler) and watch it on a radar display."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+  { name = "Joaquim Pedro de Morais Filho", email = "j360074@hotmail.com" },
+]
+keywords = ["wifi-sensing", "csi", "doppler", "radar", "motion-detection",
+            "rssi", "esp32", "channel-state-information"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Physics",
+  "Topic :: System :: Networking :: Monitoring",
+]
+dependencies = ["numpy>=1.24"]
+
+[project.optional-dependencies]
+esp32 = ["pyserial>=3.5"]
+
+[project.scripts]
+waveradar = "waveradar.__main__:main"
+
+[project.urls]
+Homepage = "https://elevbit-ai.github.io/waveradar/"
+Repository = "https://github.com/elevbit-ai/waveradar"
+
+[tool.setuptools]
+packages = ["waveradar", "waveradar.sources"]
+
+[tool.setuptools.package-data]
+waveradar = ["web/*.html"]

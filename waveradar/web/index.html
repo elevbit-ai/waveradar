@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WaveRadar</title>
+<meta name="author" content="Joaquim Pedro de Morais Filho">
+<style>
+  :root{
+    --bg:#050d0a; --panel:#081711; --line:#0f2b1e;
+    --green:#2bff88; --green-dim:#0f9150; --amber:#ffc74d; --red:#ff5d5d;
+    --text:#c9f4dd; --muted:#5e8f76;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);
+       font-family:"Segoe UI",system-ui,sans-serif;min-height:100vh;
+       display:flex;flex-direction:column;align-items:center;padding:18px}
+  header{width:100%;max-width:1060px;display:flex;align-items:baseline;
+         gap:14px;margin-bottom:14px;flex-wrap:wrap}
+  h1{font-size:22px;letter-spacing:3px;color:var(--green);font-weight:600}
+  h1 span{color:var(--muted);font-weight:300}
+  #src{margin-left:auto;font-size:12px;color:var(--muted);
+       font-family:Consolas,monospace}
+  .grid{display:grid;grid-template-columns:minmax(300px,620px) 300px;
+        gap:16px;width:100%;max-width:1060px;justify-content:center}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);
+         border-radius:12px;padding:14px}
+  canvas{display:block;width:100%;height:auto}
+  .label{font-size:11px;letter-spacing:2px;color:var(--muted);
+         text-transform:uppercase;margin-bottom:8px}
+  #level{font-size:30px;font-weight:700;letter-spacing:2px;
+         font-family:Consolas,monospace;transition:color .25s}
+  .row{display:flex;justify-content:space-between;font-size:13px;
+       font-family:Consolas,monospace;color:var(--text);padding:3px 0}
+  .row b{color:var(--muted);font-weight:400}
+  #meterWrap{height:10px;background:#03110a;border-radius:6px;
+             overflow:hidden;margin:10px 0 4px;border:1px solid var(--line)}
+  #meter{height:100%;width:0%;background:linear-gradient(90deg,
+         var(--green-dim),var(--green),var(--amber),var(--red));
+         transition:width .12s linear}
+  footer{margin-top:16px;font-size:12px;color:var(--muted)}
+  footer a{color:var(--green-dim);text-decoration:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>WAVE<span>RADAR</span></h1>
+  <div id="src">connecting…</div>
+</header>
+
+<div class="grid">
+  <div class="panel">
+    <canvas id="radar" width="640" height="640"></canvas>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="panel">
+      <div class="label">Motion</div>
+      <div id="level">—</div>
+      <div id="meterWrap"><div id="meter"></div></div>
+      <div class="row"><b>score</b><span id="score">0.00</span></div>
+      <div class="row"><b>doppler</b><span id="dop">0.00 Hz</span></div>
+      <div class="row"><b>rssi</b><span id="rssi">— dBm</span></div>
+      <div class="row"><b>rate</b><span id="fps">— Hz</span></div>
+      <div class="row"><b>mode</b><span id="mode">—</span></div>
+    </div>
+    <div class="panel">
+      <div class="label">Doppler spectrum · 0.15–4 Hz</div>
+      <canvas id="spec" width="272" height="130"></canvas>
+    </div>
+    <div class="panel">
+      <div class="label">Waterfall</div>
+      <canvas id="fall" width="272" height="150"></canvas>
+    </div>
+  </div>
+</div>
+
+<footer>WaveRadar — Wi-Fi sensing motion radar ·
+  © 2026 Joaquim Pedro de Morais Filho</footer>
+
+<script>
+"use strict";
+const radar = document.getElementById("radar");
+const rctx = radar.getContext("2d");
+const spec = document.getElementById("spec");
+const sctx = spec.getContext("2d");
+const fall = document.getElementById("fall");
+const fctx = fall.getContext("2d");
+
+let state = null;
+let sweep = 0;                 // sweep angle in degrees
+let blips = [];                // {a, r, i, born}
+const LEVEL_COLOR = {calibrating:"#33604a", idle:"#5e8f76", low:"#2bff88",
+                     motion:"#ffc74d", strong:"#ff5d5d"};
+const LEVEL_TEXT  = {calibrating:"CALIBRATING", idle:"IDLE", low:"LOW",
+                     motion:"MOTION", strong:"STRONG"};
+
+async function poll(){
+  try{
+    const r = await fetch("/api/state");
+    state = await r.json();
+    document.getElementById("src").textContent =
+      state.source + " · " + state.samples + " samples";
+    document.getElementById("score").textContent = state.score.toFixed(2);
+    document.getElementById("dop").textContent =
+      state.doppler_hz.toFixed(2) + " Hz";
+    document.getElementById("rssi").textContent = state.rssi + " dBm";
+    document.getElementById("fps").textContent = state.fps.toFixed(1)+" Hz";
+    document.getElementById("mode").textContent =
+      state.csi ? "CSI ("+"subcarriers)" : "RSSI";
+    const lvl = document.getElementById("level");
+    lvl.textContent = LEVEL_TEXT[state.level] || "—";
+    lvl.style.color = LEVEL_COLOR[state.level] || "#5e8f76";
+    document.getElementById("meter").style.width =
+      (state.score*100).toFixed(0)+"%";
+    const now = performance.now();
+    for(const p of state.points)
+      blips.push({a:p.a, r:p.r, i:p.i, born:now});
+    if(blips.length > 400) blips = blips.slice(-400);
+    drawSpec(state.spectrum);
+    drawFall(state.spectrum);
+  }catch(e){
+    document.getElementById("src").textContent = "reconnecting…";
+  }
+}
+setInterval(poll, 85);
+
+function drawSpec(bins){
+  const w = spec.width, h = spec.height;
+  sctx.fillStyle = "#03110a"; sctx.fillRect(0,0,w,h);
+  if(!bins || !bins.length) return;
+  const bw = w / bins.length;
+  for(let i=0;i<bins.length;i++){
+    const v = bins[i];
+    sctx.fillStyle = v>0.75 ? "#ff5d5d" : v>0.45 ? "#ffc74d" : "#2bff88";
+    sctx.globalAlpha = 0.35 + 0.65*v;
+    sctx.fillRect(i*bw+1, h*(1-v), bw-2, h*v);
+  }
+  sctx.globalAlpha = 1;
+}
+
+function drawFall(bins){
+  const w = fall.width, h = fall.height;
+  fctx.drawImage(fall, 0, 1);               // scroll down 1px
+  fctx.fillStyle = "#03110a"; fctx.fillRect(0,0,w,1);
+  if(!bins || !bins.length) return;
+  const bw = w / bins.length;
+  for(let i=0;i<bins.length;i++){
+    const v = bins[i];
+    if(v < 0.06) continue;
+    const g = Math.round(120 + 135*v);
+    fctx.fillStyle = v>0.7
+      ? `rgba(255,${Math.round(220-120*v)},80,${0.3+0.7*v})`
+      : `rgba(40,${g},110,${0.25+0.75*v})`;
+    fctx.fillRect(i*bw, 0, Math.ceil(bw), 1);
+  }
+}
+
+function drawRadar(ts){
+  const w = radar.width, h = radar.height;
+  const cx = w/2, cy = h/2, R = Math.min(w,h)/2 - 18;
+  rctx.fillStyle = "#050d0a"; rctx.fillRect(0,0,w,h);
+
+  // rings + cross
+  rctx.strokeStyle = "#0f2b1e"; rctx.lineWidth = 1;
+  for(let k=1;k<=4;k++){
+    rctx.beginPath(); rctx.arc(cx,cy,R*k/4,0,Math.PI*2); rctx.stroke();
+  }
+  rctx.beginPath();
+  rctx.moveTo(cx-R,cy); rctx.lineTo(cx+R,cy);
+  rctx.moveTo(cx,cy-R); rctx.lineTo(cx,cy+R);
+  for(let a=30;a<360;a+=30){
+    if(a%90===0) continue;
+    const rad=(a-90)*Math.PI/180;
+    rctx.moveTo(cx,cy);
+    rctx.lineTo(cx+R*Math.cos(rad), cy+R*Math.sin(rad));
+  }
+  rctx.stroke();
+
+  // degree labels
+  rctx.fillStyle = "#33604a"; rctx.font = "11px Consolas,monospace";
+  rctx.textAlign = "center";
+  for(let a=0;a<360;a+=30){
+    const rad=(a-90)*Math.PI/180;
+    rctx.fillText(a+"°", cx+(R+11)*Math.cos(rad), cy+(R+11)*Math.sin(rad)+4);
+  }
+
+  // sweep
+  sweep = (sweep + 1.6) % 360;
+  const srad = (sweep-90)*Math.PI/180;
+  const grad = rctx.createConicGradient
+    ? (()=>{ const g = rctx.createConicGradient(srad - 0.9, cx, cy);
+             g.addColorStop(0, "rgba(43,255,136,0)");
+             g.addColorStop(0.86, "rgba(43,255,136,0)");
+             g.addColorStop(1, "rgba(43,255,136,0.30)");
+             return g; })()
+    : "rgba(43,255,136,0.12)";
+  rctx.save();
+  rctx.beginPath(); rctx.arc(cx,cy,R,0,Math.PI*2); rctx.clip();
+  rctx.fillStyle = grad;
+  rctx.beginPath(); rctx.moveTo(cx,cy);
+  rctx.arc(cx,cy,R, srad-0.9, srad); rctx.closePath(); rctx.fill();
+  rctx.restore();
+  rctx.strokeStyle = "rgba(43,255,136,0.85)"; rctx.lineWidth = 2;
+  rctx.beginPath(); rctx.moveTo(cx,cy);
+  rctx.lineTo(cx+R*Math.cos(srad), cy+R*Math.sin(srad)); rctx.stroke();
+
+  // blips (fade over 2.6 s)
+  const now = performance.now();
+  blips = blips.filter(b => now - b.born < 2600);
+  for(const b of blips){
+    const age = (now - b.born)/2600;
+    const alpha = (1-age) * (0.35 + 0.65*b.i);
+    const rad = (b.a-90)*Math.PI/180;
+    const x = cx + R*b.r*Math.cos(rad);
+    const y = cy + R*b.r*Math.sin(rad);
+    const size = 3 + 6*b.i;
+    const glow = rctx.createRadialGradient(x,y,0,x,y,size*3);
+    const hot = b.i > 0.7;
+    glow.addColorStop(0, hot
+      ? `rgba(255,120,90,${alpha})` : `rgba(43,255,136,${alpha})`);
+    glow.addColorStop(1, "rgba(43,255,136,0)");
+    rctx.fillStyle = glow;
+    rctx.beginPath(); rctx.arc(x,y,size*3,0,Math.PI*2); rctx.fill();
+    rctx.fillStyle = hot
+      ? `rgba(255,200,160,${alpha})` : `rgba(190,255,215,${alpha})`;
+    rctx.beginPath(); rctx.arc(x,y,size*0.55,0,Math.PI*2); rctx.fill();
+  }
+
+  // centre dot
+  rctx.fillStyle = "#2bff88";
+  rctx.beginPath(); rctx.arc(cx,cy,3,0,Math.PI*2); rctx.fill();
+
+  requestAnimationFrame(drawRadar);
+}
+requestAnimationFrame(drawRadar);
+</script>
+</body>
+</html>
