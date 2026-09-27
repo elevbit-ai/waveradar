@@ -72,6 +72,13 @@ output format.
 
 ## Android
 
+Download the signed APK and the explainer:
+
+- [WaveRadar-1.0.0.apk](https://github.com/elevbit-ai/waveradar/releases/download/android-v1.0.0/WaveRadar-1.0.0.apk)
+- [How the phone reads presence](https://elevbit-ai.github.io/waveradar/android.html) — narrated video, step by step, by Joaquim Pedro de Morais Filho
+
+
+
 The signed app reads presence from the router you are already connected to. It samples that link's RSSI on the phone, compares the variation with a quiet baseline, and holds "present" for a configurable timeout after the last movement. Install the APK from the release **[android-v1.0.0](https://github.com/elevbit-ai/waveradar/releases/tag/android-v1.0.0)**. The certificate is published in [`android/AUTHORSHIP.md`](android/AUTHORSHIP.md) (Joaquim Pedro de Morais Filho, j360074@hotmail.com).
 
 Place the phone still, across the room from the router, and stay still during the 8-second calibration. Then walk through the link. Android does not expose CSI to apps, so this build does not claim Doppler or direction unless the phone is genuinely updating RSSI at 8 Hz or faster. Details, limits, and the build: [`android/README.md`](android/README.md).

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WaveRadar Android — como funciona a presença pelo roteador</title>
+<meta name="description" content="Como o aplicativo WaveRadar lê presença pelo Wi-Fi do seu roteador. Criado por Joaquim Pedro de Morais Filho.">
+<meta name="author" content="Joaquim Pedro de Morais Filho">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+<style>
+  :root{
+    --bg:#050d0a; --panel:#081711; --line:#0f2b1e;
+    --green:#2bff88; --green-dim:#0f9150; --amber:#ffc74d;
+    --text:#c9f4dd; --muted:#5e8f76;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);
+       font-family:"Segoe UI",system-ui,sans-serif;line-height:1.65}
+  .wrap{max-width:960px;margin:0 auto;padding:0 22px}
+  nav{position:sticky;top:0;background:rgba(5,13,10,.92);
+      backdrop-filter:blur(6px);border-bottom:1px solid var(--line);z-index:9}
+  nav .wrap{display:flex;align-items:center;gap:18px;padding:12px 22px;flex-wrap:wrap}
+  .logo{font-weight:700;letter-spacing:3px;color:var(--green);
+        font-size:17px;text-decoration:none}
+  .logo span{color:var(--muted);font-weight:300}
+  nav a{color:var(--muted);text-decoration:none;font-size:14px}
+  nav a:hover{color:var(--green)}
+  header.hero{padding:56px 0 28px}
+  .kicker{color:var(--amber);font-family:Consolas,monospace;font-size:13px;letter-spacing:1px}
+  h1{font-size:clamp(32px,5vw,48px);color:var(--green);letter-spacing:1px;line-height:1.15;margin:8px 0 12px}
+  .tag{max-width:680px;font-size:18px}
+  .by{margin-top:14px;color:var(--text)}
+  .by b{color:var(--green)}
+  .cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+  .btn{padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px}
+  .btn.primary{background:var(--green);color:#03110a}
+  .btn.ghost{border:1px solid var(--green-dim);color:var(--green)}
+  section{padding:36px 0;border-top:1px solid var(--line)}
+  h2{color:var(--green);font-size:24px;margin-bottom:14px}
+  h3{color:var(--text);font-size:18px;margin:18px 0 6px}
+  p{margin:8px 0 12px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  video{width:100%;border-radius:14px;border:1px solid var(--line);background:#000;display:block}
+  .hash{font-family:Consolas,monospace;font-size:13px;color:var(--amber);word-break:break-all}
+  ol,ul{padding-left:22px}
+  li{margin:8px 0}
+  li b{color:var(--green)}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:8px}
+  .step{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .step .n{color:var(--amber);font-family:Consolas,monospace;font-size:13px}
+  .states{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+  .state{border-radius:12px;padding:14px;border:1px solid var(--line);background:var(--panel)}
+  .state strong{display:block;margin-bottom:4px}
+  .cal{color:var(--amber)} .empty{color:var(--muted)} .here{color:var(--green)}
+  .linkfig{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+           background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+  .node{min-width:120px;text-align:center}
+  .box{border:1px solid var(--green-dim);border-radius:10px;padding:10px 12px;color:var(--green)}
+  .waves{flex:1;min-width:80px;height:2px;background:linear-gradient(90deg,var(--green),transparent,var(--green));
+         position:relative}
+  .note{border-left:3px solid var(--amber);padding:12px 16px;background:#120f05;border-radius:0 10px 10px 0;margin-top:14px}
+  table{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:8px}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--amber);font-weight:600}
+  footer{border-top:1px solid var(--line);padding:28px 0 40px;color:var(--muted);font-size:14px}
+  footer a{color:var(--green-dim)}
+  code{font-family:Consolas,monospace;color:var(--green);font-size:13.5px}
+</style>
+</head>
+<body>
+<nav><div class="wrap">
+  <a class="logo" href="index.html">WAVE<span>RADAR</span></a>
+  <a href="#video">Vídeo</a>
+  <a href="#como">Como funciona</a>
+  <a href="#usar">Como usar</a>
+  <a href="#download">Baixar APK</a>
+  <a href="https://github.com/elevbit-ai/waveradar">GitHub</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="kicker">Android 8 ou mais novo · APK assinado</div>
+  <h1>Presença pelo roteador, no seu telefone.</h1>
+  <p class="tag">O WaveRadar lê a intensidade do Wi-Fi entre este aparelho e o roteador em que ele já está conectado. Movimento nesse caminho muda o sinal. O aplicativo transforma essa variação em quatro estados: calibrando, vazio, presente e em movimento.</p>
+  <p class="by">Criador: <b>Joaquim Pedro de Morais Filho</b><br>
+    <a href="mailto:j360074@hotmail.com" style="color:var(--green-dim)">j360074@hotmail.com</a>
+    · © 2026 · Licença MIT</p>
+  <div class="cta">
+    <a class="btn primary" href="download/WaveRadar-1.0.0.apk">Baixar o APK completo</a>
+    <a class="btn ghost" href="https://github.com/elevbit-ai/waveradar/releases/download/android-v1.0.0/WaveRadar-1.0.0.apk">Download direto no GitHub</a>
+  </div>
+</div></header>
+
+<section id="video"><div class="wrap">
+  <h2>Vídeo: o que o aplicativo faz</h2>
+  <p>Narração em português. A cena mostra o enlace entre o roteador e o telefone, a passagem de uma pessoa nesse caminho, a calibração e o nome do criador.</p>
+  <video controls playsinline preload="metadata" poster="assets/screenshot.png">
+    <source src="assets/android-explainer.mp4" type="video/mp4">
+  </video>
+</div></section>
+
+<section id="como"><div class="wrap">
+  <h2>Como a leitura funciona</h2>
+  <p>O telefone não enxerga a sala. Ele só recebe um número que o Android já calcula: o <b>RSSI</b>, a força do sinal em dBm da rede Wi-Fi à qual o aparelho está associado. Esse número descreve o enlace entre o telefone e o roteador.</p>
+  <div class="linkfig">
+    <div class="node"><div class="box">Roteador</div><div style="color:var(--muted);font-size:13px;margin-top:6px">origem das ondas</div></div>
+    <div class="waves"></div>
+    <div class="node"><div class="box" style="color:var(--amber);border-color:var(--amber)">Pessoa</div><div style="color:var(--muted);font-size:13px;margin-top:6px">mexe no caminho</div></div>
+    <div class="waves"></div>
+    <div class="node"><div class="box">Telefone</div><div style="color:var(--muted);font-size:13px;margin-top:6px">mede o RSSI</div></div>
+  </div>
+  <p>Com a sala quieta, o RSSI fica quase parado. Quando alguém atravessa o espaço entre o roteador e o telefone, o corpo reflete e absorve parte das ondas. O número sobe e desce. O WaveRadar compara essa variação com a linha de base aprendida na calibração.</p>
+  <h3>Os quatro estados</h3>
+  <div class="states">
+    <div class="state"><strong class="cal">Calibrando</strong>Os primeiros 8 segundos. O telefone parado e você imóvel, para o app aprender o sinal quieto.</div>
+    <div class="state"><strong class="empty">Vazio</strong>A variação continua perto da linha de base. Nenhum movimento recente no enlace.</div>
+    <div class="state"><strong class="here">Em movimento</strong>A variação sobe acima da sala quieta. Alguém está mexendo no caminho do rádio agora.</div>
+    <div class="state"><strong class="here">Presente</strong>Houve movimento e o tempo de retenção (15, 30, 60 ou 120 segundos) ainda não acabou.</div>
+  </div>
+  <div class="note">Uma pessoa imóvel, depois desse tempo, volta a aparecer como vazio. O RSSI não vê quem está parado. Ventilador, cortina e um telefone na mão também mexem no sinal. Para medir a sala, o telefone fica sobre a mesa, do outro lado do cômodo em relação ao roteador.</div>
+  <h3>O que a tela mostra</h3>
+  <ul>
+    <li><b>Intensidade</b> — o quanto o sinal saiu da linha de base, de 0 a 100%.</li>
+    <li><b>RSSI em dBm</b> e a faixa (2,4 GHz, 5 GHz ou 6 GHz).</li>
+    <li><b>Linha do sinal</b> — se ela não se mexe enquanto você anda, o Android está entregando o RSSI devagar demais neste aparelho.</li>
+    <li><b>Ponto no radar</b> — fica no eixo telefone–roteador. Mais perto do centro significa mais movimento. Não é a posição da pessoa na sala.</li>
+    <li><b>Doppler</b> — só aparece se o telefone atualizar o RSSI a pelo menos 8 Hz. Na maioria dos aparelhos esse número fica oculto, de propósito.</li>
+  </ul>
+  <h3>O que este APK não faz</h3>
+  <ul>
+    <li>Não obtém CSI. O Android não entrega amplitude e fase por subportadora para um aplicativo. Isso continua no programa de computador e no ESP32 deste projeto.</li>
+    <li>Não aponta a direção de quem entrou e não desenha um mapa da sala.</li>
+    <li>Não identifica pessoas e não lista celulares de vizinhos.</li>
+    <li>Não envia amostras para a internet. A leitura fica no telefone.</li>
+  </ul>
+</div></section>
+
+<section id="usar"><div class="wrap">
+  <h2>Como usar</h2>
+  <div class="steps">
+    <div class="step"><div class="n">01</div><h3>Baixe o APK</h3><p>Android 8 ou mais novo. Abra o arquivo e permita a instalação.</p></div>
+    <div class="step"><div class="n">02</div><h3>Entre no Wi-Fi</h3><p>Conecte o telefone ao roteador que você administra. Dados móveis não servem.</p></div>
+    <div class="step"><div class="n">03</div><h3>Aceite o aviso</h3><p>O app pede para usar só em espaço seu, com o conhecimento de quem está presente.</p></div>
+    <div class="step"><div class="n">04</div><h3>Calibre parado</h3><p>Deixe o telefone na mesa, do outro lado da sala. Fique imóvel nos 8 segundos.</p></div>
+    <div class="step"><div class="n">05</div><h3>Atravesse o enlace</h3><p>Ande entre o telefone e o roteador. A linha de RSSI deve se mover e o estado ir para em movimento.</p></div>
+  </div>
+  <p>A permissão de localização só serve para mostrar o nome da rede. O RSSI é lido mesmo se você negar. Para parar, use o botão na tela ou Parar na notificação. Enquanto a notificação estiver ativa, a leitura continua com a tela apagada.</p>
+</div></section>
+
+<section id="download"><div class="wrap">
+  <h2>APK completo para download</h2>
+  <div class="panel">
+    <p><b>WaveRadar 1.0.0</b> · pacote <code>ai.elevbit.waveradar</code> · assinado por Joaquim Pedro de Morais Filho</p>
+    <p><a class="btn primary" href="download/WaveRadar-1.0.0.apk">Baixar WaveRadar-1.0.0.apk</a></p>
+    <p style="margin-top:14px">O mesmo arquivo na release do GitHub, se o link acima ainda não tiver sido publicado pelo GitHub Pages:</p>
+    <p><a href="https://github.com/elevbit-ai/waveradar/releases/download/android-v1.0.0/WaveRadar-1.0.0.apk">github.com/elevbit-ai/waveradar/releases/download/android-v1.0.0/WaveRadar-1.0.0.apk</a></p>
+    <p>SHA-256 do APK</p>
+    <p class="hash">387957A64C715F4CB2B84B0A585D914E5BEA40E6AA2D2E368F41533F6198F87F</p>
+    <p>SHA-256 do certificado</p>
+    <p class="hash">F5:81:EB:8E:53:66:C4:D4:E0:CD:A0:87:C4:D7:48:48:41:0B:B4:B5:C3:6B:40:2A:E4:50:60:E4:95:6B:E8:61</p>
+    <p>No computador: <code>certutil -hashfile WaveRadar-1.0.0.apk SHA256</code></p>
+  </div>
+  <h3>Conferir a assinatura</h3>
+  <table>
+    <tr><th>Campo</th><th>Valor</th></tr>
+    <tr><td>Criador</td><td>Joaquim Pedro de Morais Filho</td></tr>
+    <tr><td>E-mail</td><td>j360074@hotmail.com</td></tr>
+    <tr><td>Certificado</td><td>RSA 2048, SHA256withRSA, válido até 12 de fevereiro de 2054</td></tr>
+    <tr><td>CN</td><td>Joaquim Pedro de Morais Filho</td></tr>
+  </table>
+  <p>Código, chave e certificado: <a href="https://github.com/elevbit-ai/waveradar/tree/main/android">github.com/elevbit-ai/waveradar/tree/main/android</a></p>
+</div></section>
+
+<footer><div class="wrap">
+  <div>WaveRadar · MIT · <a href="index.html">site</a> · <a href="https://github.com/elevbit-ai/waveradar">GitHub</a></div>
+  <div style="margin-top:6px;color:var(--text)">© 2026 <b>Joaquim Pedro de Morais Filho</b> · <a href="mailto:j360074@hotmail.com">j360074@hotmail.com</a></div>
+</div></footer>
+</body>
+</html>

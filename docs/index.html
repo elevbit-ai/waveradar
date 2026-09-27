@@ -85,7 +85,7 @@
 <nav><div class="wrap">
   <a class="logo" href="#">WAVE<span>RADAR</span></a>
   <a href="#demo" data-i18n="nav_demo">Demo</a>
-  <a href="#tutorial" data-i18n="nav_tut">Tutorial</a>
+  <a href="android.html" data-i18n="nav_apk">Android</a>
   <a href="#install" data-i18n="nav_install">Install</a>
   <a href="#how" data-i18n="nav_how">How it works</a>
   <a href="https://github.com/elevbit-ai/waveradar">GitHub</a>
@@ -100,8 +100,9 @@
   <div class="badges">MIT License · Python 3.9+ · Windows &amp; Linux ·
      RSSI / CSI (ESP32)</div>
   <div class="cta">
-    <a class="btn primary" href="#install" data-i18n="cta_install">Install in one line</a>
-    <a class="btn ghost" href="#demo" data-i18n="cta_demo">Watch the demo</a>
+    <a class="btn primary" href="android.html" data-i18n="cta_apk">Download the APK</a>
+    <a class="btn ghost" href="#install" data-i18n="cta_install">Install in one line</a>
+    <a class="btn ghost" href="android.html#video" data-i18n="cta_explain">How the phone reads presence</a>
   </div>
 </div></header>
 
@@ -180,7 +181,7 @@ waveradar --source esp32 <b># true CSI via ESP32</b></pre>
       <div class="mode">Android 8+</div>
       <h3>Presence on the phone</h3>
       <p data-i18n="mode_apk">The signed app reads the RSSI of the Wi-Fi link between your phone and the router it joined, then estimates motion presence. No CSI and no real bearing — Android does not expose them. Samples stay on the device.</p>
-      <div class="hw"><a href="https://github.com/elevbit-ai/waveradar/releases/tag/android-v1.0.0">Signed APK · android-v1.0.0</a></div>
+      <div class="hw"><a href="android.html">APK completo · Joaquim Pedro de Morais Filho</a></div>
     </div>
   </div>
 </div></section>
@@ -236,8 +237,10 @@ document.querySelectorAll(".copy").forEach(b=>{
 });
 
 const PT = {
-  nav_demo:"Demo", nav_tut:"Tutorial", nav_install:"Instalar",
+  nav_demo:"Demo", nav_apk:"Android", nav_install:"Instalar",
   nav_how:"Como funciona",
+  cta_explain:"Como o telefone lê presença",
+  cta_apk:"Baixar o APK",
   tut_h:"Vídeo tutorial",
   tut_p:"Um passo a passo completo e narrado (pt-BR): a física por trás do sensoriamento Wi-Fi, a instalação no Windows e no Linux, como ler o radar, os três modos de sensoriamento, o pipeline de processamento de sinais passo a passo, o firmware CSI do ESP32 e os limites honestos do sistema.",
   tagline:"Veja movimento através do canal de rádio do seu próprio roteador — CSI, Doppler e análise de amplitude/fase, exibidos como um radar ao vivo. Sem câmeras. Sem sensores extras.",
