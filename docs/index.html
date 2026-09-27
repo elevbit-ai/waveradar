@@ -176,6 +176,12 @@ waveradar --source esp32 <b># true CSI via ESP32</b></pre>
          render the demo video above.</p>
       <div class="hw" data-i18n="hw_none2">Hardware: none</div>
     </div>
+    <div class="panel card">
+      <div class="mode">Android 8+</div>
+      <h3>Presence on the phone</h3>
+      <p data-i18n="mode_apk">The signed app reads the RSSI of the Wi-Fi link between your phone and the router it joined, then estimates motion presence. No CSI and no real bearing — Android does not expose them. Samples stay on the device.</p>
+      <div class="hw"><a href="https://github.com/elevbit-ai/waveradar/releases/tag/android-v1.0.0">Signed APK · android-v1.0.0</a></div>
+    </div>
   </div>
 </div></section>
 
@@ -248,6 +254,7 @@ const PT = {
   hw_esp:"Hardware: uma placa ESP32 (~R$ 25)",
   mode_sim_h:"Simulador",
   mode_sim:"CSI sintético de 52 subportadoras com um alvo em movimento roteirizado — experimente o sistema inteiro sem hardware. Usado para renderizar o vídeo demo acima.",
+  mode_apk:"O aplicativo assinado lê o RSSI do enlace entre o telefone e o roteador em que ele entrou e estima presença por movimento. Sem CSI e sem direção real — o Android não entrega isso. As amostras ficam no aparelho.",
   how_h:"Como funciona",
   f_body:"corpo em movimento", f_pert:"multipercurso perturbado",
   f_win:"janela deslizante (64 amostras), remoção dos caminhos estáticos",

@@ -8,7 +8,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-2bff88.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://python.org)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-lightgrey.svg)](#quick-start)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20Android-lightgrey.svg)](#quick-start)
 [![Website](https://img.shields.io/badge/Website-elevbit--ai.github.io%2Fwaveradar-0f9150.svg)](https://elevbit-ai.github.io/waveradar/)
 
 [**Website**](https://elevbit-ai.github.io/waveradar/) · [**Demo video**](https://elevbit-ai.github.io/waveradar/#demo) · [**Video tutorial (pt-BR)**](https://elevbit-ai.github.io/waveradar/#tutorial) · [**Português (BR)**](README.pt-BR.md)
@@ -63,11 +63,18 @@ The radar opens at `http://127.0.0.1:8347`. It calibrates for a few seconds
 | **RSSI** (default) | None — any router + your PC's Wi-Fi | Received signal strength, ~6–9 Hz | Motion presence, intensity, dominant Doppler frequency |
 | **CSI / ESP32** | One $4 ESP32 dev board | ~52 subcarriers, amplitude + phase, 50–100 Hz | Everything above, plus per-subcarrier structure → richer micro-Doppler and multi-sector radar blips |
 | **Simulator** | None | Synthetic 52-subcarrier CSI | Full pipeline demo, used for the video above |
+| **Android** | Phone on your own Wi-Fi, Android 8+ | RSSI of the phone↔router link, at the rate the OS actually updates it | Motion presence and intensity on the device. No CSI and no real bearing — see [`android/README.md`](android/README.md) |
 
 For CSI mode, flash the included firmware:
 **[`firmware/esp32/`](firmware/esp32/)** (Arduino IDE, 5 minutes). The parser
 also accepts Espressif's official [`esp-csi`](https://github.com/espressif/esp-csi)
 output format.
+
+## Android
+
+The signed app reads presence from the router you are already connected to. It samples that link's RSSI on the phone, compares the variation with a quiet baseline, and holds "present" for a configurable timeout after the last movement. Install the APK from the release **[android-v1.0.0](https://github.com/elevbit-ai/waveradar/releases/tag/android-v1.0.0)**. The certificate is published in [`android/AUTHORSHIP.md`](android/AUTHORSHIP.md) (Joaquim Pedro de Morais Filho, j360074@hotmail.com).
+
+Place the phone still, across the room from the router, and stay still during the 8-second calibration. Then walk through the link. Android does not expose CSI to apps, so this build does not claim Doppler or direction unless the phone is genuinely updating RSSI at 8 Hz or faster. Details, limits, and the build: [`android/README.md`](android/README.md).
 
 ## How it works
 

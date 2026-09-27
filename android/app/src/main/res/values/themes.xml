@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.WaveRadar" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/radar_bg</item>
+        <item name="android:navigationBarColor">@color/radar_bg</item>
+        <item name="android:windowBackground">@color/radar_bg</item>
+    </style>
+</resources>

@@ -58,11 +58,18 @@ O radar abre em `http://127.0.0.1:8347`. Ele calibra por alguns segundos
 | **RSSI** (padrão) | Nenhum — qualquer roteador + o Wi-Fi do seu PC | Intensidade do sinal, ~6–9 Hz | Presença de movimento, intensidade, frequência Doppler dominante |
 | **CSI / ESP32** | Uma placa ESP32 (~R$ 25) | ~52 subportadoras, amplitude + fase, 50–100 Hz | Tudo acima + estrutura por subportadora → micro-Doppler mais rico e pontos em múltiplos setores |
 | **Simulador** | Nenhum | CSI sintético de 52 subportadoras | Pipeline completo, usado no vídeo acima |
+| **Android** | Telefone na sua própria rede, Android 8+ | RSSI do enlace telefone↔roteador, na taxa em que o sistema realmente atualiza | Presença por movimento e intensidade, no próprio aparelho. Sem CSI e sem direção real — veja [`android/README.md`](android/README.md) |
 
 Para o modo CSI, grave o firmware incluído em
 **[`firmware/esp32/`](firmware/esp32/)** (Arduino IDE, 5 minutos). O parser
 também aceita o formato do [`esp-csi`](https://github.com/espressif/esp-csi)
 oficial da Espressif.
+
+## Android
+
+O aplicativo assinado lê presença pelo roteador em que o telefone já está conectado. Ele amostra o RSSI desse enlace, compara a variação com uma linha de base quieta e mantém "presente" por um tempo configurável depois do último movimento. O APK está na release **[android-v1.0.0](https://github.com/elevbit-ai/waveradar/releases/tag/android-v1.0.0)**. O certificado está em [`android/AUTHORSHIP.md`](android/AUTHORSHIP.md) (Joaquim Pedro de Morais Filho, j360074@hotmail.com).
+
+Deixe o telefone parado, do outro lado do cômodo em relação ao roteador, e fique imóvel nos 8 segundos de calibração. Depois atravesse o enlace. O Android não entrega CSI para aplicativos, então esta versão não afirma Doppler nem direção, a menos que o telefone atualize o RSSI a 8 Hz ou mais. Limites e compilação: [`android/README.md`](android/README.md).
 
 ## Como funciona
 

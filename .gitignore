@@ -4,3 +4,13 @@ __pycache__/
 build/
 dist/
 .venv/
+
+# Android
+android/.gradle/
+android/local.properties
+android/keystore.properties
+android/**/build/
+*.jks
+*.p12
+*.keystore
+android/captures/
