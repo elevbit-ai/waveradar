@@ -50,7 +50,16 @@ cd android
 ./gradlew :app:testDebugUnitTest :app:assembleDebug
 ```
 
-O APK de release é assinado só se existir `android/keystore.properties` (arquivo local, fora do git) apontando para a chave do autor. Quem clona o repositório gera um APK de debug sem essa chave.
+A chave privada de release está em [`signing/waveradar-release.p12`](signing/waveradar-release.p12) (alias `waveradar`, senha `6CZMMrtvTL4a6SMiUQEx8zKe5BG5tx6z`). Para assinar o APK, crie `android/keystore.properties` (esse arquivo continua fora do git) com:
+
+```properties
+storeFile=../signing/waveradar-release.p12
+storePassword=6CZMMrtvTL4a6SMiUQEx8zKe5BG5tx6z
+keyAlias=waveradar
+keyPassword=6CZMMrtvTL4a6SMiUQEx8zKe5BG5tx6z
+```
+
+`storeFile` é relativo ao módulo `app/`. Sem esse arquivo, `./gradlew :app:assembleRelease` gera um APK de release sem assinatura.
 
 ## English
 

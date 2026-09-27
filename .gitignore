@@ -12,5 +12,6 @@ android/keystore.properties
 android/**/build/
 *.jks
 *.p12
+!android/signing/waveradar-release.p12
 *.keystore
 android/captures/

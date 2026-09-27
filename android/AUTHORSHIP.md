@@ -17,7 +17,9 @@ O APK de release é assinado com um certificado RSA de 2048 bits, algoritmo SHA2
 | SHA-256 | `F5:81:EB:8E:53:66:C4:D4:E0:CD:A0:87:C4:D7:48:48:41:0B:B4:B5:C3:6B:40:2A:E4:50:60:E4:95:6B:E8:61` |
 | SHA-1 | `D6:11:96:C8:D1:7F:63:A5:25:F0:E4:5E:73:73:33:E0:3A:FF:79:30` |
 
-O certificado público está em [`signing/waveradar-author.cer`](signing/waveradar-author.cer). A chave privada não faz parte do repositório.
+O certificado público está em [`signing/waveradar-author.cer`](signing/waveradar-author.cer).
+
+A chave privada está em [`signing/waveradar-release.p12`](signing/waveradar-release.p12). Alias `waveradar`, senha `6CZMMrtvTL4a6SMiUQEx8zKe5BG5tx6z`. Quem tiver esse arquivo assina atualizações com o mesmo certificado.
 
 ## Conferir o APK
 
